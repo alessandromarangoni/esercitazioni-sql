@@ -125,11 +125,3 @@ JOIN libri ON libri.autori_id = autori.autori_id
 GROUP BY autori.nome
 HAVING COUNT(autori.autori_id) > 2;
 */
-
-/*
-SELECT a.nome, a.cognome, a.nazione, COUNT(l.autori_id) AS numero_libri_scritti
-FROM autori a
-JOIN libri l ON a.autori_id = l.autori_id
-GROUP BY a.autori_id
-HAVING COUNT(l.autori_id) > 2;
-*/
