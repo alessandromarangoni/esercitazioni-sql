@@ -109,3 +109,27 @@ FROM libri
 JOIN autori ON libri.autori_id = autori.autori_id
 WHERE (nazione IN ('Russia', 'Italia') AND numero_pagine > 100 )
 */
+
+/*
+SELECT * 
+FROM libri 
+JOIN autori ON libri.autori_id = autori.autori_id
+WHERE libri.anno < 2000 
+AND libri.anno > 1960;
+*/
+
+/*
+SELECT autori.nome, COUNT(autori.autori_id) AS numero_libri
+FROM autori
+JOIN libri ON libri.autori_id = autori.autori_id
+GROUP BY autori.nome
+HAVING COUNT(autori.autori_id) > 2;
+*/
+
+/*
+SELECT a.nome, a.cognome, a.nazione, COUNT(l.autori_id) AS numero_libri_scritti
+FROM autori a
+JOIN libri l ON a.autori_id = l.autori_id
+GROUP BY a.autori_id
+HAVING COUNT(l.autori_id) > 2;
+*/
