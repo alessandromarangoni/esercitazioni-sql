@@ -1,5 +1,4 @@
-
-DROP PROCEDURE crea_libro
+DROP PROCEDURE IF EXISTS crea_libro
 
 DELIMITER //
 
@@ -12,13 +11,13 @@ CREATE PROCEDURE crea_libro(
     IN numero_pagine INT,
     IN anno INT
 )
-BEGIN
+main_block: BEGIN
 
     DECLARE id_autore BIGINT;
     DECLARE id_genere BIGINT;
     DECLARE id_editore BIGINT;
     
--- seleziono l id autore
+-- AUTORE
     SELECT autori_id INTO id_autore
     FROM autori
     WHERE cognome = cognome_autore 
@@ -27,12 +26,13 @@ BEGIN
     
     IF id_autore IS NULL 
     THEN
-    SELECT CONCAT('EDITORE Non Censito');
+    SELECT CONCAT('AUTORE Non Censito') AS MESSAGGIO;
     CALL LogAttivita('Autore Non Censito', 'crea_libro', 'Admin', 'warning');
-    ELSE
+    LEAVE main_block;
+	END IF;
     
     
--- seleziono l id genere     
+-- GENERE
     SELECT genere_id INTO id_genere 
     FROM genere
     WHERE descrizione = descrizione_genere
@@ -49,7 +49,7 @@ BEGIN
     END IF;
     
     
--- seleziono l id editore
+-- EDITORE
     SELECT editore_id INTO id_editore 
     FROM editori 
     WHERE editori.nome = nome_editore
@@ -57,14 +57,14 @@ BEGIN
     IF id_editore IS NULL
     THEN
 	CALL LogAttivita('editore Non Censito', 'crea_libro', 'Admin', 'warning');
-    SELECT CONCAT('EDITORE Non Censito');
-    ELSE
-    
+    SELECT CONCAT('EDITORE Non Censito') AS MESSAGGIO;
+	LEAVE main_block;
+	END IF;
+        
     INSERT INTO libri (nome, numero_pagine, autori_id, genere_id, editore_id, anno)
     VALUES (titolo, numero_pagine, id_autore, id_genere, id_editore, anno);
 	CALL LogAttivita('libro aggiunto con successo', 'crea_libro', 'Admin', 'info');
-    END IF;
-    END IF;
+    
 END //
 
 DELIMITER ;
