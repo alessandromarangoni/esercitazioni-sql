@@ -1,8 +1,10 @@
+--creo db
 DROP SCHEMA IF EXISTS libri;
 CREATE SCHEMA libri ;
-
+--uso db 
 USE libri;
 
+--creo tab autori
 CREATE TABLE autori ( 
 autori_id BIGINT AUTO_INCREMENT NOT NULL,
 nome VARCHAR(255) NOT NULL,
@@ -14,6 +16,7 @@ nazione VARCHAR(255),
 PRIMARY KEY (autori_id)
 );
 
+--creo tab libri
 CREATE TABLE  libri (
 id_libri BIGINT AUTO_INCREMENT,
 nome VARCHAR(255) NOT NULL,
@@ -24,7 +27,7 @@ PRIMARY KEY (id_libri),
 FOREIGN KEY (autori_id) REFERENCES autori(autori_id) 
 );
 
-
+--popolo autori
 INSERT INTO autori (nome, cognome, anno_nascita, anno_morte, sesso, nazione) VALUES
 ('Alessandro', 'Manzoni', 1785, 1873, 'M', 'Italia'),
 ('Lev', 'Tolstoi', 1828, 1910, 'M', 'Russia'),
@@ -36,7 +39,7 @@ INSERT INTO autori (nome, cognome, anno_nascita, anno_morte, sesso, nazione) VAL
 ('Virginia', 'Woolf', 1882, 1941, 'F', 'Inghilterra'),
 ('Agatha', 'Christie', 1890, 1976, 'F', 'Inghilterra');
 
-
+--popolo libri
 INSERT INTO libri (nome, numero_pagine, anno, autori_id) VALUES
 ('I promessi sposi', 720, 1840, 1),
 ('Storia della colonna infame', 200, 1840, 1),
@@ -58,15 +61,17 @@ INSERT INTO libri (nome, numero_pagine, anno, autori_id) VALUES
 ("Assassinio sull'Orient Express", 256, 1934, 9),
 ('Sipario', 224, 1975, 9);
 
-/*
+
+-- ****************** SELECT PRIMA PARTE ************************
+
+--1) 
 SELECT nazione, COUNT(id_libri) AS numero_libri
 FROM autori
 JOIN libri ON libri.autori_id = autori.autori_id
 GROUP BY nazione
 ORDER BY numero_libri DESC;
-*/
-
-/*
+ 
+--2)
 SELECT autori.nome , autori.cognome , COUNT(id_libri) AS numero_libri
 FROM autori
 JOIN libri ON libri.autori_id = autori.autori_id 
@@ -74,66 +79,59 @@ AND nazione IN('inghilterra','italia')
 AND autori.anno_morte IS NULL
 GROUP BY autori.nome , autori.cognome
 HAVING COUNT(libri.id_libri) > 1;
-*/
-
-/*
+ 
+--3)
 SELECT libri.nome, autori.nazione, autori.anno_nascita
 FROM libri
 JOIN autori ON libri.autori_id = autori.autori_id
 WHERE (autori.nazione = 'USA' AND autori.anno_nascita > 1945)
 OR (autori.nazione = 'Italia' AND libri.nome LIKE '%o');
-*/
-
-/* 
+ 
+--4)  
 SELECT nome, anno 
 FROM libri 
 WHERE (YEAR(NOW()) - anno > 30);
-*/
 
-/*
+--5)
 SELECT *
 FROM libri
 JOIN autori ON libri.autori_id = autori.autori_id
 WHERE autori.sesso = 'F';
-*/
-
-/*
+ 
+ --6)
 SELECT *
 FROM libri
 WHERE length(nome) > 8
-*/
-
-/*
+ 
+ --7)
 SELECT libri.nome, numero_pagine, nazione
 FROM libri
 JOIN autori ON libri.autori_id = autori.autori_id
 WHERE (nazione IN ('Russia', 'Italia') AND numero_pagine > 100 )
-*/
-
-/*
+ 
+ --8)
 SELECT nome, numero_pagine
 FROM libri
 WHERE (numero_pagine < 200 
 AND nome LIKE 'i%');
-*/
-
-/*
+ 
+ --9)
 SELECT * 
 FROM libri 
 JOIN autori ON libri.autori_id = autori.autori_id
 WHERE libri.anno < 2000 
 AND libri.anno > 1960;
-*/
-
-/*
+ 
+ --10)
 SELECT autori.nome, COUNT(autori.autori_id) AS numero_libri
 FROM autori
 JOIN libri ON libri.autori_id = autori.autori_id
 GROUP BY autori.nome
 HAVING COUNT(autori.autori_id) > 2;
-*/
+ 
 
--- 2 PARTE --
+
+-- ********************* 2 PARTE *************************
 
 -- CREO TABELLA GENERE
 CREATE TABLE genere( 
@@ -155,6 +153,7 @@ genere_id BIGINT,
 FOREIGN KEY(genere_id) REFERENCES genere(genere_id)
 );
 
+-- AGGIUNGO DATI
 UPDATE libri
 INNER JOIN autori ON libri.autori_id = autori.autori_id
 SET libri.genere_id = CASE 
@@ -170,21 +169,25 @@ SET libri.genere_id = CASE
 ELSE libri.genere_id 
 END;
 
+--creo tab editori
 CREATE TABLE editori (
 editore_id BIGINT AUTO_INCREMENT,
 nome VARCHAR(50),
 PRIMARY KEY(editore_id)
 );
 
+-- popolo tab
 INSERT INTO editori(nome) VALUES 
 ('Amadori'),
 ('Rizzoli');
 
+-- aggiungo fk editore a libri
 ALTER TABLE libri ADD (
 editore_id BIGINT,
 FOREIGN KEY(editore_id) REFERENCES editori(editore_id)
 );
 
+--popolo con dati (editore_id) mancanti libri 
 UPDATE libri
 INNER JOIN autori ON libri.autori_id = autori.autori_id
 SET libri.editore_id = CASE 
@@ -199,6 +202,10 @@ SET libri.editore_id = CASE
     WHEN autori.autori_id = 9 THEN 1
 ELSE libri.editore_id
 END;
+
+--***********************SELECT SECONDA PARTE**********************
+
+--1)
 SELECT COUNT(*) AS numero_autori
 FROM (
     SELECT autori.autori_id
@@ -208,11 +215,13 @@ FROM (
     HAVING COUNT(libri.id_libri) > 2
 ) AS autori_con_piu_di_due_libri;
 
+--2)
 SELECT * FROM libri 
 JOIN autori ON autori.autori_id = libri.autori_id
 WHERE libri.genere_id = 1
 AND autori.anno_morte IS NULL;
 
+--3)
 SELECT * 
 FROM libri
 JOIN autori ON autori.autori_id = libri.autori_id
@@ -220,12 +229,14 @@ WHERE libri.genere_id IN (1,4)
 AND autori.sesso = 'M'
 AND libri.editore_id = 2;
 
+--4)
 SELECT editori.nome, libri.nome
 FROM libri
 JOIN editori ON editori.editore_id = libri.editore_id
 WHERE libri.genere_id  != 1
 AND length(editori.nome) < 8; 
 
+--5)
 SELECT * 
 FROM libri
 JOIN autori ON autori.autori_id = libri.autori_id
@@ -233,6 +244,7 @@ WHERE libri.genere_id  != 4
 AND autori.nazione = 'Italia'
 AND libri.nome LIKE '%i';
 
+--6)
 SELECT autori.nome, anno_nascita ,COUNT(libri.autori_id) as numero_libri
 FROM libri
 JOIN autori ON autori.autori_id = libri.autori_id
@@ -241,6 +253,7 @@ GROUP BY autori.nome, autori.anno_nascita
 HAVING COUNT(libri.id_libri) > 1
 ORDER BY anno_nascita DESC ;
 
+--7)
 SELECT * 
 FROM libri
 JOIN autori ON autori.autori_id = libri.autori_id
@@ -248,6 +261,7 @@ WHERE libri.genere_id = 4
 AND autori.nazione != 'Italia'
 ORDER BY autori.nome asc;
 
+--8)
 SELECT count(libri.id_libri) as numero_libri, genere.descrizione
 FROM libri
 JOIN autori ON autori.autori_id = libri.autori_id
@@ -256,6 +270,7 @@ where autori.nazione != "Italia"
 AND genere.genere_id != 2
 group by genere.descrizione;
 
+--9)
 SELECT *
 FROM libri
 JOIN autori ON autori.autori_id = libri.autori_id
@@ -263,6 +278,7 @@ WHERE libri.genere_id  != 4
 AND autori.nazione = 'Italia'
 AND libri.nome LIKE '%i';
 
+--10)
 SELECT editori.nome AS nome_editore, COUNT(libri.id_libri) AS numero_libri
 FROM libri
 JOIN autori ON libri.autori_id = autori.autori_id
@@ -272,16 +288,19 @@ GROUP BY editori.nome
 HAVING COUNT(libri.id_libri) > 1
 ORDER BY COUNT(libri.id_libri) ASC;
 
+--11)
 SELECT libri.nome
 FROM libri
 JOIN editori ON libri.editore_id = editori.editore_id
 WHERE LENGTH(libri.nome) > 7 AND editori.nome = 'Mondadori';
 
+--12)
 SELECT DISTINCT autori.nome, autori.cognome
 FROM autori
 JOIN libri ON autori.autori_id = libri.autori_id
 WHERE LENGTH(libri.nome) < 10 AND libri.numero_pagine BETWEEN 10 AND 500;
 
+--creo vista N1
 CREATE VIEW v_libri_autori_genere_editori AS
 SELECT 
 	autori.nome AS NomeAutore,
@@ -294,8 +313,10 @@ JOIN autori ON libri.autori_id = autori.autori_id
 JOIN genere ON libri.genere_id = genere.genere_id
 JOIN editori ON libri.editore_id = editori.editore_id;
 
+--select per vedere se funzia
 SELECT * from v_libri_autori_genere_editori;
 
+--creo vista N2
 CREATE VIEW v_libri_autori_editori_ita AS 
 SELECT 
 	 autori.nome AS NomeAutore,
@@ -307,7 +328,8 @@ JOIN autori ON libri.autori_id = autori.autori_id
 JOIN genere ON libri.genere_id = genere.genere_id
 JOIN editori ON libri.editore_id = editori.editore_id
 WHERE autori.nazione = 'italia';     
-     
+
+ --select per vedere se funzia    
 SELECT * from v_libri_autori_editori_ita;     
      
      
