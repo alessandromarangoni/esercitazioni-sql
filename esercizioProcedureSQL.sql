@@ -16,6 +16,11 @@ main_block: BEGIN
     DECLARE id_autore BIGINT;
     DECLARE id_genere BIGINT;
     DECLARE id_editore BIGINT;
+    DECLARE no_autore VARCHAR(50);
+    DECLARE no_editore VARCHAR(50);
+    
+    SET no_autore = 'AUTORE Non Censito';
+	SET no_editore = 'EDITORE Non Censito';
     
 -- AUTORE
     SELECT autori_id INTO id_autore
@@ -26,7 +31,7 @@ main_block: BEGIN
     
     IF id_autore IS NULL 
     THEN
-    SELECT CONCAT('AUTORE Non Censito') AS MESSAGGIO;
+    SELECT no_autore AS MESSAGGIO;
     CALL LogAttivita('Autore Non Censito', 'crea_libro', 'Admin', 'warning');
     LEAVE main_block;
 	END IF;
@@ -56,8 +61,8 @@ main_block: BEGIN
     LIMIT 1;
     IF id_editore IS NULL
     THEN
+    SELECT no_editore AS MESSAGGIO;
 	CALL LogAttivita('editore Non Censito', 'crea_libro', 'Admin', 'warning');
-    SELECT CONCAT('EDITORE Non Censito') AS MESSAGGIO;
 	LEAVE main_block;
 	END IF;
         
